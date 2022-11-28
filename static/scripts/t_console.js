@@ -22,6 +22,8 @@ function capitalize(string) {
     var prev = document.getElementById("prev");
     var next = document.getElementById("next");
     var clear = document.getElementById("clear");
+    var attendance = document.getElementById("attendance");
+    var assignment = document.getElementById("assignment");
     var voice = document.getElementById("voice");
     var send = document.getElementById("send");
     var whiteboard = document.getElementById("white");
@@ -94,6 +96,7 @@ function capitalize(string) {
             room: room
         });
     }
+    
     socket.on("new_message", (data) => {
         document.getElementById("chat").innerHTML += "<br>" + "<span class='messages' style='font-weight: 900;'>" + data + "</span>";
     })
@@ -200,6 +203,34 @@ function capitalize(string) {
             room: room
         })
     }
+    var attendanceCall = {}
+    attendance.onclick = function() {
+        socket.emit("take attendance", {
+            data: {},
+            room: room
+        })
+        setTimeout(function() {download(attendanceCall, 'attendance.txt', 'text/plain')}, 5000);
+    }
+    socket.on("call attendance", (data) => {
+        attendanceCall[data.name] = 1
+    })
+    function download(content, fileName, contentType) {
+        content = JSON.stringify(content)
+        var a = document.createElement("a");
+        var file = new Blob([content], {type: contentType});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+    }
+
+    assignment.onchange = function() {
+        console.log(assignment.files[0])
+        socket.emit('assignment', {
+            file : assignment.files[0],
+            room: room
+        })
+    }
+    
     prev.onclick = function() {
         socket.emit('page', {
             data: {
@@ -323,3 +354,5 @@ function capitalize(string) {
         })
     }
 })();
+
+

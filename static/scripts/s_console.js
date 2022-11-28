@@ -1,6 +1,5 @@
 'use strict';
 
-
 (function() {
     const scale = 1
     var socket = io();
@@ -63,6 +62,25 @@
     }
     socket.on("new_message", (data) => {
         document.getElementById("chat").innerHTML += "<br>" + data;
+    })
+
+    socket.on("take attendance", (data) => {
+        socket.emit("call attendance", {
+            name: name,
+            room: room
+        });
+    })
+
+    function download(content, fileName, contentType) {
+        var a = document.createElement("a");
+        var file = new Blob([content], {type: contentType});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+    }
+
+    socket.on("take_assignment", (data) => {
+        download(data, "assignment", "application/pdf");
     })
 
     function drawLine(x0, y0, x1, y1, color) {

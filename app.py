@@ -7,10 +7,15 @@ from bson.objectid import ObjectId
 import requests
 import os,shutil,os.path
 from pdf2image import convert_from_path
-
+import smtplib, ssl
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
+smtp_server = "smtp.gmail.com"
+port = 587  # For starttls
+sender_email = "teamalexisiiitl@gmail.com"
+password='vinamr2001'
+receiver_email = "your@gmail.com"
 
 
 def allowed_file(filename):
@@ -47,6 +52,22 @@ def save(email,name):
         for x in mydoc:
             room=x['_id']
     response = requests.get("https://talk9api.herokuapp.com/auth?email="+str(email)+"&room="+str(room)+"&name="+str(name)+"&pin="+str(pin))
+    
+    s = f"STUDENT->>>> http://172.70.97.149:5000/console_panel?id=t&room={room}&pin={pin}&name={name}"
+    t = f"TEACHER->>>> http://172.70.97.149:5000/console_panel?id=s&room={room}&name={name}"
+    sl = f"STUDENT->>>> http://localhost:5000/console_panel?id=t&room={room}&pin={pin}&name={name}"
+    tl = f"TEACHER->>>> http://localhost:5000/console_panel?id=s&room={room}&name={name}"
+    # context = ssl.create_default_context()
+    # with smtplib.SMTP(smtp_server, port) as server:
+    #     server.ehlo()  # Can be omitted
+    #     server.starttls(context=context)
+    #     server.ehlo()  # Can be omitted
+    #     server.login(sender_email, password)
+    #     server.sendmail(sender_email, email, message)
+    print(s)
+    print(t)
+    print(sl)
+    print(tl)
     return room
  
 def check(room,pin):
@@ -82,7 +103,7 @@ def home():
             shutil.copytree("./static/slides/demo", filename+'/img')
         if file and allowed_file(file.filename):
             file.save(filename+'/pdf/raw.pdf')
-            images = convert_from_path(filename+'/pdf/raw.pdf')
+            images = convert_from_path(filename+'/pdf/raw.pdf',poppler_path=r'C:\Program Files\poppler\bin')
             for i in range(len(images)):
                 images[i].save(filename+'/img/'+str(i)+'.jpg','JPEG')
         return redirect(url_for('success'))
@@ -159,6 +180,22 @@ def radio(blob):
     room=blob['room']
     blob=blob['blob']
     socketio.emit('voice', blob, to=room)
+
+@socketio.on('take attendance')
+def take_attendance(data):
+    room = data['room']
+    socketio.emit('take attendance', to=room)
+
+@socketio.on('call attendance')
+def call_attendance(data):
+    room = data['room']
+    socketio.emit('call attendance', data, to = room)
+
+@socketio.on('assignment')
+def assignment(data):
+    room = data['room']
+    file = data['file']
+    socketio.emit('take_assignment', file, to = room)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

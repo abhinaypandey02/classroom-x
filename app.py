@@ -53,10 +53,8 @@ def save(email,name):
             room=x['_id']
     response = requests.get("https://talk9api.herokuapp.com/auth?email="+str(email)+"&room="+str(room)+"&name="+str(name)+"&pin="+str(pin))
     
-    s = f"STUDENT->>>> http://172.70.97.149:5000/console_panel?id=t&room={room}&pin={pin}&name={name}"
-    t = f"TEACHER->>>> http://172.70.97.149:5000/console_panel?id=s&room={room}&name={name}"
-    sl = f"STUDENT->>>> http://localhost:5000/console_panel?id=t&room={room}&pin={pin}&name={name}"
-    tl = f"TEACHER->>>> http://localhost:5000/console_panel?id=s&room={room}&name={name}"
+    s = f"STUDENT->>>> http://meetssh.ml:4032/console_panel?id=t&room={room}&pin={pin}&name={name}"
+    t = f"TEACHER->>>> http://meetssh.ml:4032/console_panel?id=s&room={room}&name={name}"
     # context = ssl.create_default_context()
     # with smtplib.SMTP(smtp_server, port) as server:
     #     server.ehlo()  # Can be omitted
@@ -66,8 +64,6 @@ def save(email,name):
     #     server.sendmail(sender_email, email, message)
     print(s)
     print(t)
-    print(sl)
-    print(tl)
     return room
  
 def check(room,pin):
